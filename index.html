@@ -1,0 +1,1116 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Co-Care — نظام إدارة الحضانة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef5ff;--card:#fff;--sidebar:#1e1b4b;--text:#1e293b;--muted:#64748b;
+  --border:#e0e9ff;--primary:#6366f1;--primary2:#8b5cf6;--accent:#10d9a0;--warn:#fb923c;--danger:#f43f5e;
+  --hover:rgba(99,102,241,.15);--shadow:0 4px 20px rgba(99,102,241,.1);--radius:22px;
+  --kids-blue:#3b82f6;--kids-green:#22c55e;--kids-orange:#f97316;--kids-pink:#ec4899;--kids-purple:#a855f7;
+}
+[data-theme="dark"]{--bg:#0d1117;--card:#161b22;--sidebar:#010409;--text:#e6edf3;--muted:#8b949e;--border:#30363d;--hover:rgba(99,102,241,.25);}
+[data-theme="purple"]{--bg:#1a0533;--card:#2d0f4e;--sidebar:#0d0019;--text:#e9d5ff;--muted:#a78bfa;--border:#4c1d95;--primary:#7c3aed;--hover:rgba(124,58,237,.25);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:"Baloo Bhaijaan 2",Tahoma,"Noto Sans Arabic",Arial,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .3s,color .3s;font-size:15px;}
+body[data-theme="light"]{background:radial-gradient(circle at 8% 10%,#fde9ff 0%,transparent 38%),radial-gradient(circle at 95% 18%,#dcfdf3 0%,transparent 40%),radial-gradient(circle at 50% 95%,#fff3d6 0%,transparent 45%),var(--bg);}
+.app{display:grid;grid-template-columns:265px 1fr;height:100vh;}
+.sidebar{background:linear-gradient(180deg,#1e1b4b 0%,#2d2467 60%,#1e1b4b 100%);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(30,27,75,.2);}
+.brand{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:11px;}
+.logo{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#fbbf24,#f97316);display:grid;place-items:center;font-size:24px;flex-shrink:0;box-shadow:0 4px 14px rgba(249,115,22,.4);animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-4px) rotate(2deg)}}
+.brand-name{color:#fff;font-size:18px;font-weight:800;letter-spacing:.3px;}
+.db-status{display:flex;align-items:center;gap:5px;font-size:10.5px;margin-top:4px;}
+.db-dot{width:8px;height:8px;border-radius:50%;background:#f43f5e;flex-shrink:0;box-shadow:0 0 0 3px rgba(244,63,94,.2);}
+.db-dot.on{background:#22d3a8;box-shadow:0 0 0 3px rgba(34,211,168,.25);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.15)}}
+.nav{flex:1;padding:12px 10px;overflow-y:auto;}
+.nav-lbl{color:#8b86c9;font-size:10.5px;font-weight:800;letter-spacing:.12em;padding:12px 10px 5px;text-transform:uppercase;}
+.nb{width:100%;border:0;background:transparent;color:#c7c3f0;padding:11px 13px;text-align:right;border-radius:14px;cursor:pointer;font-size:14px;font-weight:600;display:flex;align-items:center;gap:9px;transition:all .2s cubic-bezier(.34,1.56,.64,1);margin-bottom:3px;}
+.nb:hover{background:rgba(255,255,255,.1);color:#fff;transform:translateX(-3px);}
+.nb.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:700;box-shadow:0 4px 14px rgba(99,102,241,.4);transform:translateX(-2px);}
+.nb .ni{font-size:18px;flex-shrink:0;}
+.sidebar-bottom{padding:12px 12px 16px;border-top:1px solid rgba(255,255,255,.1);}
+.theme-row{display:flex;gap:6px;margin-bottom:12px;}
+.tb{flex:1;border:0;border-radius:10px;padding:7px 3px;font-size:10.5px;font-family:inherit;cursor:pointer;font-weight:700;transition:all .25s;opacity:.65;}
+.tb:hover{opacity:.9;transform:translateY(-2px);}
+.tb.on{opacity:1;box-shadow:0 0 0 2px #fff,0 3px 10px rgba(0,0,0,.2);transform:translateY(-2px);}
+#tbL{background:#fef3c7;color:#92400e;} #tbD{background:#1e293b;color:#cbd5e1;} #tbP{background:#a855f7;color:#fff;}
+.admin{display:flex;align-items:center;gap:9px;}
+.admin-av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ec4899,#a855f7);display:grid;place-items:center;font-size:15px;box-shadow:0 3px 10px rgba(236,72,153,.4);}
+.admin-name{color:#fff;font-size:13px;font-weight:700;} .admin-role{color:#a5a0e0;font-size:10.5px;}
+.main{overflow-y:auto;background:transparent;transition:background .3s;}
+.view{display:none;padding:24px;animation:fi .25s ease;} .view.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+.ph h2{font-size:23px;font-weight:800;letter-spacing:.2px;} .ph p{color:var(--muted);font-size:13px;margin-top:4px;font-weight:500;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:19px;box-shadow:var(--shadow);transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;}
+.card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(99,102,241,.16);}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px;}
+.g2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;} .g2e{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.sl{color:var(--muted);font-size:12.5px;font-weight:700;} .sv{font-size:30px;font-weight:900;color:var(--primary);margin:5px 0;letter-spacing:-.5px;}
+.sb{display:inline-block;padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:700;background:#dcfce7;color:#15803d;}
+[data-theme="dark"] .sb,[data-theme="purple"] .sb{background:#064e3b;color:#6ee7b7;}
+.hero{background:linear-gradient(120deg,#6366f1 0%,#8b5cf6 50%,#ec4899 100%);color:#fff;border-radius:var(--radius);padding:24px 26px;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(139,92,246,.35);}
+.hero::after{content:"🧸";position:absolute;left:20px;bottom:-10px;font-size:80px;opacity:.18;transform:rotate(-8deg);}
+.hero::before{content:"✨";position:absolute;left:120px;top:14px;font-size:24px;opacity:.5;animation:twinkle 2s infinite;}
+@keyframes twinkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:.8;transform:scale(1.1)}}
+.hero h2{font-size:21px;font-weight:800;} .hero p{color:#ede9fe;font-size:13px;margin-top:7px;line-height:1.85;font-weight:500;}
+.stt{font-size:15.5px;font-weight:800;margin-bottom:13px;color:var(--text);}
+.list{display:grid;gap:9px;}
+.itm{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border:1.5px solid var(--border);border-radius:16px;background:var(--bg);transition:all .2s;}
+.itm:hover{border-color:var(--primary);transform:translateX(-3px);box-shadow:0 4px 12px rgba(99,102,241,.12);}
+.itm strong{display:block;font-size:13px;font-weight:700;margin-bottom:2px;color:var(--text);} .sub{color:var(--muted);font-size:11.5px;font-weight:500;}
+.chip{padding:4px 11px;border-radius:999px;font-size:11.5px;font-weight:800;white-space:nowrap;}
+.cg{background:#dcfce7;color:#15803d;} .cb{background:#dbeafe;color:#1d4ed8;}
+.ca{background:#ffedd5;color:#c2410c;} .cr{background:#fee2e2;color:#dc2626;}
+.cp{background:#f3e8ff;color:#7e22ce;} .cgr{background:#f1f5f9;color:#475569;}
+[data-theme="dark"] .cg,[data-theme="purple"] .cg{background:#064e3b;color:#6ee7b7;}
+[data-theme="dark"] .cb,[data-theme="purple"] .cb{background:#1e3a5f;color:#93c5fd;}
+[data-theme="dark"] .ca,[data-theme="purple"] .ca{background:#451a03;color:#fcd34d;}
+[data-theme="dark"] .cr,[data-theme="purple"] .cr{background:#450a0a;color:#fca5a5;}
+[data-theme="dark"] .cp,[data-theme="purple"] .cp{background:#2e1065;color:#c4b5fd;}
+[data-theme="dark"] .cgr,[data-theme="purple"] .cgr{background:#1f2937;color:#9ca3af;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th,.tbl td{padding:12px 14px;border-bottom:1.5px solid var(--border);text-align:right;font-size:13px;color:var(--text);}
+.tbl th{color:var(--muted);font-size:11.5px;font-weight:800;background:var(--bg);text-transform:uppercase;letter-spacing:.03em;}
+.tbl tr:last-child td{border-bottom:0;}
+.tbl tr{transition:background .15s;}
+.tbl tbody tr:hover{background:rgba(99,102,241,.05);}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:14px;border:0;cursor:pointer;font-size:13px;font-family:inherit;font-weight:700;transition:all .2s cubic-bezier(.34,1.56,.64,1);}
+.bp{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 4px 12px rgba(99,102,241,.35);}
+.bp:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 6px 18px rgba(99,102,241,.45);}
+.bo{background:transparent;color:var(--primary);border:2px solid var(--primary);} .bo:hover{background:var(--primary);color:#fff;transform:translateY(-2px);}
+.bdr{background:linear-gradient(135deg,#f43f5e,#fb7185);color:#fff;box-shadow:0 4px 12px rgba(244,63,94,.3);} .bdr:hover{transform:translateY(-2px) scale(1.03);}
+.bsu{background:linear-gradient(135deg,#10d9a0,#22c55e);color:#fff;box-shadow:0 4px 12px rgba(16,217,160,.3);} .bsu:hover{transform:translateY(-2px) scale(1.03);}
+.bsm{padding:6px 11px;font-size:11.5px;border-radius:10px;} .bprint{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff;box-shadow:0 4px 12px rgba(14,165,233,.3);}
+.bprint:hover{transform:translateY(-2px) scale(1.03);}
+.field{display:grid;gap:5px;} .field label{font-size:12px;font-weight:800;color:var(--text);}
+.field input,.field select,.field textarea{padding:10px 13px;border:2px solid var(--border);border-radius:13px;font-size:13px;font-family:inherit;color:var(--text);background:var(--card);transition:.2s;outline:none;width:100%;font-weight:500;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(99,102,241,.12);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;} .fa{display:flex;gap:8px;margin-top:16px;}
+.mo{position:fixed;inset:0;background:rgba(30,27,75,.6);z-index:200;display:none;place-items:center;backdrop-filter:blur(4px);}
+.mo.open{display:grid;}
+.md{background:var(--card);border-radius:26px;padding:26px;width:min(520px,92vw);max-height:88vh;overflow-y:auto;box-shadow:0 25px 60px rgba(30,27,75,.3);}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.mh h3{font-size:17px;font-weight:800;color:var(--text);} .xb{background:var(--bg);border:0;font-size:18px;cursor:pointer;color:var(--muted);border-radius:10px;padding:5px 10px;transition:.2s;}
+.xb:hover{background:var(--danger);color:#fff;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);background:#1e1b4b;color:#fff;padding:11px 20px;border-radius:16px;font-size:13px;font-weight:700;z-index:300;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 28px rgba(0,0,0,.3);}
+.toast.show{transform:translateX(-50%) translateY(0);} .toast.ok{background:linear-gradient(135deg,#10d9a0,#22c55e);} .toast.er{background:linear-gradient(135deg,#f43f5e,#fb7185);}
+.pb{background:var(--border);border-radius:999px;height:8px;overflow:hidden;margin-top:7px;}
+.pf{height:100%;border-radius:999px;background:linear-gradient(90deg,#6366f1,#a855f7);transition:width .8s cubic-bezier(.34,1.56,.64,1);}
+.ar{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border:2px solid var(--border);border-radius:16px;background:var(--bg);margin-bottom:8px;transition:all .2s;}
+.ar:hover{transform:translateX(-2px);}
+.ar.present{border-color:#22c55e;background:#f0fdf4;} .ar.absent{border-color:#f43f5e;background:#fff1f2;} .ar.late{border-color:#fb923c;background:#fff7ed;}
+[data-theme="dark"] .ar.present,[data-theme="purple"] .ar.present{background:#052e16;}
+[data-theme="dark"] .ar.absent,[data-theme="purple"] .ar.absent{background:#1c0404;}
+[data-theme="dark"] .ar.late,[data-theme="purple"] .ar.late{background:#1c1200;}
+.ni-item{display:flex;align-items:flex-start;gap:10px;padding:13px;border-radius:16px;background:var(--bg);border:1.5px solid var(--border);margin-bottom:8px;transition:.2s;}
+.ni-item:hover{transform:translateX(-2px);box-shadow:0 4px 12px rgba(99,102,241,.1);}
+.phone{width:240px;border:9px solid #1e1b4b;border-radius:34px;overflow:hidden;box-shadow:0 18px 44px rgba(30,27,75,.35);margin:0 auto;position:relative;}
+.phh{background:linear-gradient(120deg,#6366f1,#8b5cf6,#ec4899);color:#fff;padding:16px 14px;position:relative;}
+.phh::after{content:"👋";position:absolute;left:14px;top:14px;font-size:20px;}
+.phb{padding:12px;display:grid;gap:9px;background:linear-gradient(180deg,#fafbff,#f0f4ff);}
+.mc2{border:1.5px solid var(--border);border-radius:15px;padding:11px;background:var(--card);display:flex;align-items:flex-start;gap:9px;transition:.2s;}
+.mc2:hover{transform:scale(1.02);box-shadow:0 4px 14px rgba(99,102,241,.12);}
+.mc2-icon{font-size:20px;flex-shrink:0;line-height:1;}
+.svg-chart{width:100%;overflow:visible;}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.mobile-topbar{display:none;}
+.mobile-overlay{display:none;}
+
+@media(max-width:900px){
+  body{height:auto;overflow:auto;}
+  .app{grid-template-columns:1fr;height:auto;min-height:100vh;}
+  .mobile-topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:linear-gradient(120deg,#1e1b4b,#2d2467);padding:14px 16px;position:sticky;top:0;z-index:120;
+    box-shadow:0 4px 16px rgba(30,27,75,.25);
+  }
+  .mobile-topbar .brand{padding:0;border:0;}
+  .mobile-topbar .logo{width:34px;height:34px;font-size:17px;border-radius:11px;}
+  .mobile-topbar .brand-name{font-size:15px;}
+  .burger{background:rgba(255,255,255,.1);border:0;color:#fff;font-size:20px;cursor:pointer;padding:6px 10px;border-radius:10px;transition:.2s;}
+  .burger:hover{background:rgba(255,255,255,.2);}
+  .sidebar{
+    position:fixed;top:0;right:0;height:100vh;width:240px;z-index:150;
+    transform:translateX(100%);transition:transform .25s ease;
+  }
+  .sidebar.open{transform:translateX(0);}
+  .mobile-overlay.show{
+    display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:140;
+  }
+  .main{height:auto;overflow:visible;padding-bottom:30px;}
+  .view{padding:14px;}
+  .g4{grid-template-columns:1fr 1fr;gap:10px;}
+  .g2,.g2e{grid-template-columns:1fr;}
+  .fg{grid-template-columns:1fr;}
+  .ph{flex-direction:column;align-items:stretch;}
+  .ph .btn{width:100%;justify-content:center;}
+  .table-wrap{margin:0 -16px;padding:0 16px;}
+  .tbl{min-width:600px;}
+  .md{width:94vw;padding:16px;max-height:92vh;}
+  .ar{flex-wrap:wrap;gap:8px;}
+  .ar > div:last-child{width:100%;justify-content:flex-start;}
+  .phone{width:100%;max-width:260px;}
+}
+@media(max-width:480px){
+  .g4{grid-template-columns:1fr;}
+  .sv{font-size:22px;}
+  .hero{padding:16px 18px;}
+  .hero h2{font-size:16px;}
+  .card{padding:13px;}
+  .itm{flex-wrap:wrap;}
+  .fa{flex-direction:column;}
+  .fa .btn{width:100%;justify-content:center;}
+}
+@media print{
+  .sidebar,.btn,.theme-row,.mobile-topbar{display:none!important;}
+  .app{display:block!important;}
+  .main{height:auto!important;overflow:visible!important;}
+  .view{display:none!important;}
+  .view.active{display:block!important;}
+}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="app">
+<div class="mobile-topbar">
+  <div class="brand">
+    <div class="logo">🧸</div>
+    <div class="brand-name">Co-Care</div>
+  </div>
+  <button class="burger" onclick="toggleSidebar()">☰</button>
+</div>
+<div class="mobile-overlay" id="overlay" onclick="closeSidebar()"></div>
+<aside class="sidebar" id="sidebarEl">
+  <div class="brand">
+    <div class="logo">🧸</div>
+    <div>
+      <div class="brand-name">Co-Care</div>
+      <div class="db-status">
+        <div class="db-dot" id="db-dot"></div>
+        <span id="db-lbl" style="color:#64748b">جاري الاتصال...</span>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-lbl">الإدارة</div>
+    <button class="nb active" data-v="dashboard"><span class="ni">🏠</span>لوحة التحكم</button>
+    <button class="nb" data-v="students"><span class="ni">👶</span>الأطفال</button>
+    <button class="nb" data-v="attendance"><span class="ni">✅</span>تسجيل الحضور</button>
+    <button class="nb" data-v="reports"><span class="ni">📋</span>التقارير اليومية</button>
+    <div class="nav-lbl">التشغيل</div>
+    <button class="nb" data-v="finance"><span class="ni">💰</span>المالية</button>
+    <button class="nb" data-v="announcements"><span class="ni">📣</span>الإعلانات</button>
+    <button class="nb" data-v="parent"><span class="ni">📱</span>واجهة ولي الأمر</button>
+    <button class="nb" data-v="print"><span class="ni">🖨️</span>طباعة التقارير</button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="theme-row">
+      <button class="tb on" id="tbL" onclick="setTheme('light')">☀️ فاتح</button>
+      <button class="tb" id="tbD" onclick="setTheme('dark')">🌙 داكن</button>
+      <button class="tb" id="tbP" onclick="setTheme('purple')">💜 بنفسجي</button>
+    </div>
+    <div class="admin">
+      <div class="admin-av">👩‍💼</div>
+      <div><div class="admin-name">المديرة نورا</div><div class="admin-role">مديرة الحضانة</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+
+<div id="dashboard" class="view active">
+  <div class="ph"><div><h2>لوحة التحكم 📊</h2><p id="today-date"></p></div></div>
+  <div class="hero"><h2>Co-Care — متصل بـ Firebase 🔥</h2><p>بيانات حقيقية تظهر على كل الأجهزة فوراً عبر Firestore REST API.</p></div>
+  <div class="g4">
+    <div class="card"><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:10px;background:#3b82f622;display:grid;place-items:center;font-size:15px;">👶</div><div class="sl">إجمالي الأطفال</div></div><div class="sv" id="d-total" style="color:#3b82f6">—</div><div class="sb">مسجّلون</div></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:10px;background:#22c55e22;display:grid;place-items:center;font-size:15px;">✅</div><div class="sl">الحضور اليوم</div></div><div class="sv" id="d-present" style="color:#22c55e">—</div><div class="sb" id="d-pct">—</div></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:10px;background:#fbbf2422;display:grid;place-items:center;font-size:15px;">💰</div><div class="sl">إجمالي الرسوم</div></div><div class="sv" id="d-fees" style="color:#f59e0b">—</div><div class="sb">ج.م / شهر</div></div>
+    <div class="card"><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:10px;background:#ec489922;display:grid;place-items:center;font-size:15px;">📣</div><div class="sl">الإعلانات</div></div><div class="sv" id="d-notifs" style="color:#ec4899">—</div><div class="sb">مُرسَلة</div></div>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="stt">📊 توزيع الأطفال بالفصل</div><div id="clsChart"></div></div>
+    <div class="card">
+      <div class="stt">⚡ تنبيهات</div>
+      <div class="list">
+        <div class="itm"><div><strong>Firebase Firestore</strong><div class="sub" id="db-info">جاري الاتصال...</div></div><span class="chip cg" id="db-chip">REST API</span></div>
+        <div class="itm"><div><strong>وجبة اليوم</strong><div class="sub">أرز + فراخ مشوية + سلطة</div></div><span class="chip cb">منشور</span></div>
+        <div class="itm"><div><strong>فعالية الخميس</strong><div class="sub">يوم الألوان — 10:00 ص</div></div><span class="chip ca">جديد</span></div>
+      </div>
+      <div style="margin-top:12px;">
+        <div class="stt" style="font-size:12px">نسبة الحضور اليوم</div>
+        <div class="pb"><div class="pf" id="att-bar" style="width:0%"></div></div>
+        <div class="sub" style="margin-top:4px" id="att-txt">سيظهر بعد تسجيل الحضور</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;">
+    <div class="stt">📣 آخر الإعلانات المرسلة</div>
+    <div id="dash-ann-list" style="display:grid;gap:8px;"></div>
+  </div>
+</div>
+
+<div id="students" class="view">
+  <div class="ph">
+    <div><h2 style="color:#3b82f6">👶 الأطفال المسجّلون</h2><p>محفوظون في Firebase — يظهرون على كل الأجهزة</p></div>
+    <button class="btn bp" onclick="openM('add-modal')">➕ إضافة طفل</button>
+  </div>
+  <div class="card">
+    <div class="table-wrap">
+    <table class="tbl">
+      <thead><tr><th></th><th>الاسم</th><th>الفصل</th><th>تاريخ الميلاد</th><th>ولي الأمر</th><th>الهاتف</th><th>الرسوم</th><th></th></tr></thead>
+      <tbody id="s-tbody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل من Firebase...</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<div id="attendance" class="view">
+  <div class="ph"><div><h2 style="color:#22c55e">✅ تسجيل الحضور</h2><p>يتحفظ تلقائياً في Firebase</p></div></div>
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+      <div style="display:flex;gap:7px;flex-wrap:wrap;">
+        <span class="chip cg" id="pc">حاضر: 0</span>
+        <span class="chip cr" id="ac2">غائب: 0</span>
+        <span class="chip ca" id="lc">متأخر: 0</span>
+      </div>
+      <button class="btn bsu" id="att-save-btn" onclick="saveAtt()">💾 حفظ في Firebase</button>
+    </div>
+  </div>
+  <div id="att-list"></div>
+</div>
+
+<div id="reports" class="view">
+  <div class="ph"><div><h2 style="color:#f97316">📋 التقارير اليومية</h2><p>تُحفظ في Firebase وتظهر لولي الأمر فوراً</p></div></div>
+  <div class="g2">
+    <div class="card"><div class="stt">اختر الطفل</div><div id="rpt-list" class="list"></div></div>
+    <div class="card"><div class="stt">📝 تقرير: <span id="rpt-cname">اختر طفل</span></div><div id="rpt-body"><p class="sub" style="text-align:center;padding:16px 0">اختر طفلاً لبدء التقرير</p></div></div>
+  </div>
+</div>
+
+<div id="finance" class="view">
+  <div class="ph"><div><h2>💰 المالية</h2><p>أرقام مبنية على البيانات الحقيقية من Firebase</p></div></div>
+  <div class="g4" style="margin-bottom:16px;">
+    <div class="card"><div class="sl">إجمالي الاشتراكات</div><div class="sv" style="color:#10b981" id="fin-total">—</div><div class="sb">ج.م</div></div>
+    <div class="card"><div class="sl">المصروفات</div><div class="sv" style="color:#ef4444" id="fin-expenses">—</div><div class="sb">ج.م</div></div>
+    <div class="card"><div class="sl">صافي الربح</div><div class="sv" id="fin-profit">—</div><div class="sb">ج.م</div></div>
+    <div class="card"><div class="sl">أقساط متأخرة</div><div class="sv" style="color:#f59e0b">12.5K</div><div class="sb">ج.م</div></div>
+  </div>
+  <div class="g2e" style="margin-bottom:14px;">
+    <div class="card"><div class="stt">💰 الرسوم بالفصل</div><div id="feesChart"></div></div>
+    <div class="card"><div class="stt">📊 توزيع الأطفال</div><div id="clsChart2"></div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="stt">➕ إضافة مصروف جديد</div>
+      <div style="display:grid;gap:10px;">
+        <div class="fg">
+          <div class="field"><label>اسم المصروف</label><input id="exp-name" type="text" placeholder="مثال: إيجار، كهرباء، مرتبات"/></div>
+          <div class="field"><label>القيمة (ج.م)</label><input id="exp-amount" type="number" placeholder="5000"/></div>
+        </div>
+        <button class="btn bp" id="exp-btn" onclick="addExpense()">💾 حفظ المصروف في Firebase</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="stt">📑 سجل المصروفات <span class="chip cr" id="exp-count">0</span></div>
+      <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr><th>البند</th><th>القيمة</th><th>التاريخ</th><th></th></tr></thead>
+        <tbody id="exp-tbody"><tr><td colspan="4" style="text-align:center;padding:14px;color:var(--muted)">لا توجد مصروفات مسجّلة بعد</td></tr></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="announcements" class="view">
+  <div class="ph"><div><h2>📣 الإعلانات</h2><p>تُحفظ في Firebase وتظهر لكل المستخدمين</p></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="stt">إرسال إعلان جديد</div>
+      <div style="display:grid;gap:11px;">
+        <div class="field"><label>عنوان الإعلان</label><input id="a-title" type="text" placeholder="مثال: وجبة الغد"/></div>
+        <div class="field"><label>نص الرسالة</label><textarea id="a-body" rows="3" placeholder="اكتب الرسالة هنا..."></textarea></div>
+        <div class="field"><label>نوع الإعلان</label>
+          <select id="a-type">
+            <option value="blue">💙 معلومة</option><option value="green">💚 مهم</option>
+            <option value="amber">🧡 تنبيه</option><option value="red">❤️ عاجل</option>
+          </select>
+        </div>
+        <button class="btn bp" id="ann-btn" onclick="sendAnn()">📤 إرسال للأهالي</button>
+      </div>
+    </div>
+    <div class="card"><div class="stt">الإعلانات المرسلة</div><div id="notif-list" style="max-height:360px;overflow-y:auto;"></div></div>
+  </div>
+</div>
+
+<div id="parent" class="view">
+  <div class="ph"><div><h2>📱 واجهة ولي الأمر</h2><p>بيانات حقيقية من Firebase</p></div></div>
+  <div class="g2e">
+    <div class="card"><div class="stt">اختر طفل للمعاينة</div><div id="par-list" class="list"></div></div>
+    <div>
+      <div style="display:grid;place-items:center;padding:10px 0;">
+        <div class="phone">
+          <div class="phh"><strong id="par-title" style="font-size:12px">أهلاً بك</strong><div style="opacity:.8;font-size:10px;margin-top:2px" id="par-upd">اختر طفل للمعاينة</div></div>
+          <div class="phb" id="par-body"><div class="mc2"><div class="sub" style="text-align:center;padding:7px 0">اختر طفلاً لعرض بياناته</div></div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px;">
+        <div class="stt" style="font-size:13px">📣 تنبيهات وإعلانات الحضانة</div>
+        <div id="par-ann-list" style="display:grid;gap:7px;max-height:220px;overflow-y:auto;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="print" class="view">
+  <div class="ph">
+    <div><h2>🖨️ طباعة التقارير</h2><p>اختر طفل واطبع تقريره كاملاً</p></div>
+    <button class="btn bprint" onclick="doPrint()">🖨️ طباعة الآن</button>
+  </div>
+  <div class="g2">
+    <div class="card"><div class="stt">اختر طفل</div><div id="print-list" class="list"></div></div>
+    <div class="card" id="print-preview"><p class="sub" style="text-align:center;padding:16px 0">اختر طفلاً لمعاينة التقرير</p></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mo" id="add-modal">
+  <div class="md">
+    <div class="mh"><h3>➕ إضافة طفل جديد</h3><button class="xb" onclick="closeM('add-modal')">✕</button></div>
+    <div class="fg">
+      <div class="field"><label>اسم الطفل</label><input id="f-name" type="text" placeholder="الاسم بالكامل"/></div>
+      <div class="field"><label>الفصل</label><select id="f-cls"><option>Nursery</option><option>Pre-K</option><option>KG1</option><option>KG2</option></select></div>
+      <div class="field"><label>تاريخ الميلاد</label><input id="f-dob" type="date"/></div>
+      <div class="field"><label>الرسوم الشهرية (ج.م)</label><input id="f-fees" type="number" placeholder="2500"/></div>
+      <div class="field"><label>اسم ولي الأمر</label><input id="f-par" type="text" placeholder="اسم الأب / الأم"/></div>
+      <div class="field"><label>رقم الهاتف</label><input id="f-phone" type="tel" placeholder="01xxxxxxxxx"/></div>
+    </div>
+    <div class="fa">
+      <button class="btn bp" id="add-btn" onclick="addStudent()">💾 حفظ في Firebase</button>
+      <button class="btn bo" onclick="closeM('add-modal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">تم</div>
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════════
+//  FIREBASE REST API — بدون أي SDK خارجي
+// ══════════════════════════════════════════════
+const FB = {
+  project: 'co-care-nursery',
+  apiKey:  'AIzaSyBzVGz1Ler8OkKhx6gdRp7p8zf3hBYqZPw',
+  base() { return `https://firestore.googleapis.com/v1/projects/${this.project}/databases/(default)/documents`; },
+  url(col, doc='') { return `${this.base()}/${col}${doc?'/'+doc:''}?key=${this.apiKey}`; },
+
+  // convert JS object → Firestore fields format
+  toFS(obj) {
+    const fields = {};
+    for (const [k,v] of Object.entries(obj)) {
+      if (v === null || v === undefined) fields[k] = {nullValue: null};
+      else if (typeof v === 'boolean') fields[k] = {booleanValue: v};
+      else if (typeof v === 'number')  fields[k] = {doubleValue: v};
+      else if (typeof v === 'object')  fields[k] = {stringValue: JSON.stringify(v)};
+      else fields[k] = {stringValue: String(v)};
+    }
+    return {fields};
+  },
+
+  // convert Firestore document → plain JS object
+  fromFS(doc) {
+    if (!doc || !doc.fields) return {};
+    const obj = {};
+    for (const [k,v] of Object.entries(doc.fields)) {
+      if ('stringValue' in v) {
+        try { obj[k] = JSON.parse(v.stringValue); } catch { obj[k] = v.stringValue; }
+      } else if ('doubleValue' in v) obj[k] = v.doubleValue;
+      else if ('integerValue' in v) obj[k] = parseInt(v.integerValue);
+      else if ('booleanValue' in v) obj[k] = v.booleanValue;
+      else obj[k] = null;
+    }
+    // extract document id from name
+    if (doc.name) obj._id = doc.name.split('/').pop();
+    return obj;
+  },
+
+  async get(col, docId='') {
+    const r = await fetch(this.url(col, docId));
+    if (!r.ok) {
+      // 404 on a single document just means "doesn't exist yet" — not a real error
+      if (r.status === 404 && docId) return {};
+      let msg = `HTTP ${r.status}`;
+      try {
+        const errBody = await r.json();
+        if (errBody.error && errBody.error.message) msg = errBody.error.message;
+      } catch {}
+      throw new Error(msg);
+    }
+    const d = await r.json();
+    if (d.documents) return d.documents.map(x => this.fromFS(x));
+    return this.fromFS(d);
+  },
+
+  async add(col, data) {
+    const r = await fetch(this.url(col), {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(this.toFS(data))
+    });
+    if (!r.ok) throw new Error(await r.text());
+    return this.fromFS(await r.json());
+  },
+
+  async set(col, docId, data) {
+    const r = await fetch(this.url(col, docId), {
+      method: 'PATCH',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(this.toFS(data))
+    });
+    if (!r.ok) throw new Error(await r.text());
+    return this.fromFS(await r.json());
+  },
+
+  async del(col, docId) {
+    const r = await fetch(this.url(col, docId), {method:'DELETE'});
+    if (!r.ok) throw new Error(await r.text());
+  }
+};
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+const AVT=['🐻','🐼','🦁','🐸','🐧','🦊','🐨','🐯','🐰','🐮'];
+const CLR=['#dbeafe','#dcfce7','#fef3c7','#ede9fe','#fee2e2','#ecfdf5','#fef9c3','#ffedd5'];
+const TOD = new Date().toISOString().slice(0,10);
+
+let S=[], A={}, N=[], R={}, E=[];
+let currentTheme = localStorage.getItem('cc-theme')||'light';
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function toast(msg, type='ok') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+function openM(id)  { document.getElementById(id).classList.add('open'); }
+function closeM(id) { document.getElementById(id).classList.remove('open'); }
+
+function setLoading(btnId, loading, label) {
+  const b = document.getElementById(btnId);
+  if (!b) return;
+  b.disabled = loading;
+  b.innerHTML = loading ? `<span class="spin"></span> جاري...` : label;
+}
+
+function setDBStatus(ok, errMsg) {
+  document.getElementById('db-dot').classList.toggle('on', ok);
+  const lbl = document.getElementById('db-lbl');
+  lbl.textContent = ok ? 'متصل بـ Firebase 🔥' : 'غير متصل';
+  lbl.style.color = ok ? '#10b981' : '#ef4444';
+  const chip = document.getElementById('db-chip');
+  const info = document.getElementById('db-info');
+  if (chip) { chip.className = ok?'chip cg':'chip cr'; chip.textContent = ok?'متصل ✅':'خطأ ❌'; }
+  if (info) {
+    if (ok) {
+      info.textContent = 'Firebase Firestore REST API';
+    } else {
+      let short = (errMsg||'').slice(0,120);
+      info.textContent = 'تعذّر الاتصال' + (short ? ': '+short : '');
+      info.title = errMsg || '';
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+//  MOBILE SIDEBAR TOGGLE
+// ══════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebarEl').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeSidebar() {
+  document.getElementById('sidebarEl').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════════
+function setTheme(t) {
+  currentTheme=t; localStorage.setItem('cc-theme',t);
+  document.body.setAttribute('data-theme',t);
+  document.querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
+  document.getElementById(t==='light'?'tbL':t==='dark'?'tbD':'tbP').classList.add('on');
+  setTimeout(renderAllCharts, 300);
+}
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+const VIEWS = {dashboard:rDash,students:rStudents,attendance:rAtt,reports:rRpts,finance:rFinance,announcements:rAnns,parent:rPar,print:rPrint};
+document.querySelectorAll('.nb').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    const id=b.dataset.v;
+    document.getElementById(id).classList.add('active');
+    (VIEWS[id]||function(){})();
+    closeSidebar();
+  });
+});
+
+// ══════════════════════════════════════════════
+//  LOAD ALL DATA
+// ══════════════════════════════════════════════
+async function loadAll() {
+  let connectOk = false;
+  let lastError = '';
+
+  // test connection first with a single simple call
+  try {
+    await FB.get('students');
+    connectOk = true;
+  } catch(e) {
+    connectOk = false;
+    lastError = e.message || String(e);
+  }
+
+  if (!connectOk) {
+    setDBStatus(false, lastError);
+    toast('⚠️ تعذّر الاتصال بـ Firebase — تحقق من الإنترنت', 'er');
+    S = getDemoStudents();
+    updateDashStats();
+    renderAllCharts();
+    rDash();
+    return;
+  }
+
+  try {
+    const [students, attDoc, notifs, reports, expenses] = await Promise.all([
+      FB.get('students').catch(()=>[]),
+      FB.get('attendance', TOD).catch(()=>({})),
+      FB.get('notifications').catch(()=>[]),
+      FB.get('reports').catch(()=>[]),
+      FB.get('expenses').catch(()=>[])
+    ]);
+
+    S = Array.isArray(students) ? students.sort((a,b)=>(a.name||'').localeCompare(b.name||'','ar')) : [];
+    A[TOD] = attDoc._id ? attDoc : (attDoc || {});
+    delete A[TOD]._id;
+    N = Array.isArray(notifs) ? notifs : [];
+    if (Array.isArray(reports)) { R={}; reports.forEach(r=>{ R[r._id]=r; }); }
+    E = Array.isArray(expenses) ? expenses.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')) : [];
+
+    setDBStatus(true);
+    if (S.length === 0) await seedDemoData();
+    updateDashStats();
+    renderAllCharts();
+    const active = document.querySelector('.view.active');
+    if (active) (VIEWS[active.id]||function(){})();
+  } catch(e) {
+    setDBStatus(false, e.message);
+    toast('⚠️ خطأ في تحميل البيانات', 'er');
+    S = getDemoStudents();
+    updateDashStats();
+    renderAllCharts();
+    rDash();
+  }
+}
+
+async function seedDemoData() {
+  const demo = getDemoStudents();
+  for (const s of demo) {
+    const {_id, id, ...data} = s;
+    await FB.add('students', data).catch(()=>{});
+  }
+  S = await FB.get('students').catch(()=>demo);
+  if (Array.isArray(S)) S.sort((a,b)=>a.name?.localeCompare(b.name,'ar'));
+}
+
+function getDemoStudents() {
+  return [
+    {name:'آدم محمد',cls:'KG1',dob:'2021-03-15',par:'محمد أحمد',phone:'01012345678',fees:2500},
+    {name:'ليان أحمد',cls:'Pre-K',dob:'2022-07-20',par:'أحمد إبراهيم',phone:'01198765432',fees:2200},
+    {name:'سيف خالد',cls:'KG2',dob:'2020-11-05',par:'خالد سعيد',phone:'01234567890',fees:2800},
+    {name:'ملك طارق',cls:'KG1',dob:'2021-06-12',par:'طارق يوسف',phone:'01512345678',fees:2500},
+    {name:'يوسف علي',cls:'Nursery',dob:'2023-01-08',par:'علي حسن',phone:'01612345678',fees:2000},
+    {name:'نور محمود',cls:'KG2',dob:'2020-09-17',par:'محمود عمر',phone:'01712345678',fees:2800},
+  ];
+}
+
+// ══════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════
+function rDash() {
+  document.getElementById('today-date').textContent =
+    new Date().toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  updateDashStats();
+  renderAllCharts();
+  renderAnnouncementsTo('dash-ann-list', 3);
+}
+
+function updateDashStats() {
+  document.getElementById('d-total').textContent = S.length;
+  document.getElementById('d-notifs').textContent = N.length;
+  const td = A[TOD]||{};
+  const p = Object.values(td).filter(v=>v==='present').length;
+  const pct = S.length ? Math.round(p/S.length*100) : 0;
+  document.getElementById('d-present').textContent = p;
+  document.getElementById('d-pct').textContent = pct+'%';
+  document.getElementById('att-bar').style.width = pct+'%';
+  document.getElementById('att-txt').textContent = p+' من '+S.length+' طفل — '+pct+'%';
+  const totalFees = S.reduce((a,s)=>a+(s.fees||0), 0);
+  const totalExpenses = E.reduce((a,e)=>a+(e.amount||0), 0);
+  const feesEl = document.getElementById('d-fees');
+  if (feesEl) feesEl.textContent = (totalFees/1000).toFixed(1)+'K';
+  const finEl = document.getElementById('fin-total');
+  if (finEl) finEl.textContent = (totalFees/1000).toFixed(1)+'K';
+  const expEl = document.getElementById('fin-expenses');
+  if (expEl) expEl.textContent = (totalExpenses/1000).toFixed(1)+'K';
+  const profEl = document.getElementById('fin-profit');
+  if (profEl) profEl.textContent = ((totalFees-totalExpenses)/1000).toFixed(1)+'K';
+}
+
+// ══════════════════════════════════════════════
+//  SVG CHARTS
+// ══════════════════════════════════════════════
+function gc() {
+  const d = currentTheme!=='light';
+  return {grid:d?'#30363d':'#e2e8f0', text:d?'#8b949e':'#6b7280', primary:'#4f46e5'};
+}
+
+function svgHBar(elId, labels, values, colors) {
+  const el=document.getElementById(elId); if(!el) return;
+  const c=gc();
+  const W=420, barH=24, gap=10, PL=75, PR=55, PT=6;
+  const H=PT+(barH+gap)*labels.length;
+  const maxV=Math.max(...values,1);
+  let rows='';
+  labels.forEach((l,i)=>{
+    const y=PT+i*(barH+gap);
+    const bw=Math.max(4,(W-PL-PR)*(values[i]/maxV));
+    rows+=`<text x="${PL-6}" y="${y+barH/2+4}" text-anchor="end" font-size="10" fill="${c.text}">${l}</text>`;
+    rows+=`<rect x="${PL}" y="${y}" width="${W-PL-PR}" height="${barH}" rx="4" fill="${c.grid}"/>`;
+    rows+=`<rect x="${PL}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="${colors[i]||c.primary}cc"/>`;
+    rows+=`<text x="${PL+bw+4}" y="${y+barH/2+4}" font-size="10" fill="${c.text}" font-weight="600">${values[i]}</text>`;
+  });
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H+4}" class="svg-chart" style="max-height:${H+10}px">${rows}</svg>`;
+}
+
+function renderAllCharts() {
+  const clsCounts={Nursery:0,'Pre-K':0,KG1:0,KG2:0};
+  S.forEach(s=>{ if(clsCounts[s.cls]!==undefined) clsCounts[s.cls]++; });
+  svgHBar('clsChart', Object.keys(clsCounts), Object.values(clsCounts), ['#10b981','#4f46e5','#f59e0b','#ef4444']);
+  svgHBar('clsChart2', Object.keys(clsCounts), Object.values(clsCounts), ['#10b981','#4f46e5','#f59e0b','#ef4444']);
+  const feesByCls={Nursery:0,'Pre-K':0,KG1:0,KG2:0};
+  S.forEach(s=>{ if(feesByCls[s.cls]!==undefined) feesByCls[s.cls]+=(s.fees||0); });
+  svgHBar('feesChart', Object.keys(feesByCls), Object.values(feesByCls), ['#10b981','#4f46e5','#f59e0b','#ef4444']);
+}
+
+// ══════════════════════════════════════════════
+//  STUDENTS
+// ══════════════════════════════════════════════
+function rStudents() {
+  const tbody=document.getElementById('s-tbody');
+  if (!S.length) {
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">لا يوجد أطفال — اضغط "إضافة طفل"</td></tr>';
+    return;
+  }
+  tbody.innerHTML=S.map((s,i)=>`
+    <tr>
+      <td style="font-size:17px">${AVT[i%10]}</td>
+      <td><strong>${s.name||'—'}</strong></td>
+      <td><span class="chip cb">${s.cls||'—'}</span></td>
+      <td>${s.dob||'—'}</td>
+      <td>${s.par||'—'}</td>
+      <td dir="ltr">${s.phone||'—'}</td>
+      <td>${(s.fees||0).toLocaleString('ar-EG')} ج.م</td>
+      <td><button class="btn bdr bsm" onclick="delStudent('${s._id}','${s.name}')">🗑️</button></td>
+    </tr>`).join('');
+}
+
+async function addStudent() {
+  const name=document.getElementById('f-name').value.trim();
+  const cls=document.getElementById('f-cls').value;
+  const dob=document.getElementById('f-dob').value;
+  const fees=parseInt(document.getElementById('f-fees').value)||2000;
+  const par=document.getElementById('f-par').value.trim();
+  const phone=document.getElementById('f-phone').value.trim();
+  if (!name) { toast('⚠️ أدخل اسم الطفل','er'); return; }
+  if (!par)  { toast('⚠️ أدخل اسم ولي الأمر','er'); return; }
+  setLoading('add-btn', true, '');
+  try {
+    await FB.add('students', {name,cls,dob,fees,par,phone,createdAt:TOD});
+    closeM('add-modal');
+    toast('✅ تم إضافة '+name+' في Firebase');
+    ['f-name','f-par','f-phone','f-fees'].forEach(id=>document.getElementById(id).value='');
+    await loadAll();
+  } catch(e) {
+    toast('❌ خطأ: '+e.message,'er');
+  } finally {
+    setLoading('add-btn', false, '💾 حفظ في Firebase');
+  }
+}
+
+async function delStudent(id, name) {
+  if (!confirm('حذف '+name+'؟')) return;
+  try {
+    await FB.del('students', id);
+    toast('🗑️ تم حذف '+name);
+    await loadAll();
+  } catch(e) {
+    toast('❌ خطأ في الحذف','er');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  ATTENDANCE
+// ══════════════════════════════════════════════
+function rAtt() {
+  if (!A[TOD]) A[TOD]={};
+  document.getElementById('att-list').innerHTML=S.map((s,i)=>{
+    const st=A[TOD][s._id]||'';
+    return `<div class="ar ${st}" id="ar-${s._id}">
+      <div style="display:flex;align-items:center;gap:9px;">
+        <div style="background:${CLR[i%8]};width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:14px">${AVT[i%10]}</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--text)">${s.name}</div><div class="sub">${s.cls}</div></div>
+      </div>
+      <div style="display:flex;gap:5px;">
+        <button class="btn bsu bsm" onclick="setA('${s._id}','present')">✅ حاضر</button>
+        <button class="btn bsm" style="background:#fef3c7;color:#92400e" onclick="setA('${s._id}','late')">⏰ متأخر</button>
+        <button class="btn bdr bsm" onclick="setA('${s._id}','absent')">❌ غائب</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateAttCounts();
+}
+
+function setA(id, st) {
+  if (!A[TOD]) A[TOD]={};
+  A[TOD][id]=st;
+  const r=document.getElementById('ar-'+id);
+  if (r) r.className='ar '+st;
+  updateAttCounts();
+}
+
+function updateAttCounts() {
+  const v=Object.values(A[TOD]||{});
+  document.getElementById('pc').textContent='حاضر: '+v.filter(x=>x==='present').length;
+  document.getElementById('ac2').textContent='غائب: '+v.filter(x=>x==='absent').length;
+  document.getElementById('lc').textContent='متأخر: '+v.filter(x=>x==='late').length;
+}
+
+async function saveAtt() {
+  setLoading('att-save-btn', true, '');
+  try {
+    await FB.set('attendance', TOD, A[TOD]||{});
+    toast('✅ تم حفظ الحضور في Firebase');
+    updateDashStats();
+  } catch(e) {
+    toast('❌ خطأ في الحفظ','er');
+  } finally {
+    setLoading('att-save-btn', false, '💾 حفظ في Firebase');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  REPORTS
+// ══════════════════════════════════════════════
+function rRpts() {
+  document.getElementById('rpt-list').innerHTML=S.map((s,i)=>`
+    <div class="itm" style="cursor:pointer" onclick="openRpt('${s._id}')">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="background:${CLR[i%8]};width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px">${AVT[i%10]}</div>
+        <div><strong>${s.name}</strong><div class="sub">${s.cls}</div></div>
+      </div>
+      <span class="chip ${R[s._id+'-'+TOD]?'cg':'cgr'}">${R[s._id+'-'+TOD]?'مكتمل ✓':'لم يُملأ'}</span>
+    </div>`).join('');
+}
+
+function openRpt(sid) {
+  const s=S.find(x=>x._id===sid); if (!s) return;
+  const rKey=sid+'-'+TOD;
+  document.getElementById('rpt-cname').textContent=s.name;
+  const r=R[rKey]||{};
+  document.getElementById('rpt-body').innerHTML=`<div style="display:grid;gap:10px;">
+    <div class="fg">
+      <div class="field"><label>🍽️ الوجبة</label><select id="rm">${['تناول الوجبة كاملاً','تناول 80%','تناول 50%','لم يتناول'].map(o=>`<option ${r.meal===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>😴 النوم (دقيقة)</label><input id="rs" type="number" value="${r.sleep||60}" min="0" max="180"/></div>
+      <div class="field"><label>🚽 الحمّام</label><select id="rt">${['مرة','مرتين','أكثر من مرتين'].map(o=>`<option ${r.toilet===o?'selected':''}>${o}</option>`).join('')}</select></div>
+      <div class="field"><label>😊 الحالة</label><select id="rmo">${['ممتاز','جيد','متعب قليلاً','بكى'].map(o=>`<option ${r.mood===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    </div>
+    <div class="field"><label>🎨 النشاط</label><input id="ra" type="text" value="${r.activity||''}" placeholder="تلوين، بازل..."/></div>
+    <div class="field"><label>💬 ملاحظة للوالدين</label><textarea id="rn" rows="2">${r.note||''}</textarea></div>
+    <div class="fa"><button class="btn bp" id="rpt-save-btn" onclick="saveRpt('${sid}')">💾 حفظ في Firebase</button></div>
+  </div>`;
+}
+
+async function saveRpt(sid) {
+  const rKey=sid+'-'+TOD;
+  const data={studentId:sid,date:TOD,
+    meal:document.getElementById('rm').value,
+    sleep:document.getElementById('rs').value,
+    toilet:document.getElementById('rt').value,
+    activity:document.getElementById('ra').value,
+    mood:document.getElementById('rmo').value,
+    note:document.getElementById('rn').value};
+  setLoading('rpt-save-btn', true, '');
+  try {
+    await FB.set('reports', rKey, data);
+    R[rKey]=data;
+    toast('✅ تم حفظ التقرير في Firebase');
+    rRpts();
+  } catch(e) {
+    toast('❌ خطأ في الحفظ','er');
+  } finally {
+    setLoading('rpt-save-btn', false, '💾 حفظ في Firebase');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  FINANCE
+// ══════════════════════════════════════════════
+function rFinance() { updateDashStats(); renderAllCharts(); renderExpenses(); }
+
+function renderExpenses() {
+  const tbody = document.getElementById('exp-tbody');
+  const countEl = document.getElementById('exp-count');
+  if (countEl) countEl.textContent = E.length;
+  if (!tbody) return;
+  if (!E.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:14px;color:var(--muted)">لا توجد مصروفات مسجّلة بعد</td></tr>';
+    return;
+  }
+  tbody.innerHTML = E.map(e => `
+    <tr>
+      <td><strong>${e.name||'—'}</strong></td>
+      <td style="color:#ef4444;font-weight:700">${(e.amount||0).toLocaleString('ar-EG')} ج.م</td>
+      <td>${e.createdAt||'—'}</td>
+      <td><button class="btn bdr bsm" onclick="delExpense('${e._id}','${e.name}')">🗑️</button></td>
+    </tr>`).join('');
+}
+
+async function addExpense() {
+  const name = document.getElementById('exp-name').value.trim();
+  const amount = parseFloat(document.getElementById('exp-amount').value);
+  if (!name) { toast('⚠️ أدخل اسم المصروف','er'); return; }
+  if (!amount || amount<=0) { toast('⚠️ أدخل قيمة صحيحة','er'); return; }
+  setLoading('exp-btn', true, '');
+  try {
+    await FB.add('expenses', {name, amount, createdAt: TOD});
+    toast('✅ تم حفظ المصروف في Firebase');
+    document.getElementById('exp-name').value='';
+    document.getElementById('exp-amount').value='';
+    E = await FB.get('expenses').catch(()=>E);
+    if (Array.isArray(E)) E.sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+    renderExpenses();
+    updateDashStats();
+  } catch(e) {
+    toast('❌ خطأ: '+e.message,'er');
+  } finally {
+    setLoading('exp-btn', false, '💾 حفظ المصروف في Firebase');
+  }
+}
+
+async function delExpense(id, name) {
+  if (!confirm('حذف مصروف "'+name+'"؟')) return;
+  try {
+    await FB.del('expenses', id);
+    toast('🗑️ تم حذف المصروف');
+    E = await FB.get('expenses').catch(()=>E);
+    renderExpenses();
+    updateDashStats();
+  } catch(e) {
+    toast('❌ خطأ في الحذف','er');
+  }
+}
+
+
+// ══════════════════════════════════════════════
+//  ANNOUNCEMENTS
+// ══════════════════════════════════════════════
+function rAnns() { renderAnnList(); }
+
+// shared renderer — used by the full list page, the dashboard mini-card, and parent view
+function renderAnnouncementsTo(elId, limit) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (!N.length) {
+    el.innerHTML = '<p class="sub" style="text-align:center;padding:10px 0">لا توجد إعلانات بعد</p>';
+    return;
+  }
+  const items = limit ? N.slice(0, limit) : N;
+  el.innerHTML = items.map(n => `<div class="ni-item">
+    <div style="font-size:16px">${n.type==='red'?'🚨':n.type==='green'?'✅':n.type==='amber'?'⚠️':'📢'}</div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--text)">${n.title||''}</div>
+      <div class="sub" style="margin-top:2px;line-height:1.6">${n.body||''}</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">${n.time||''}</div>
+    </div>
+  </div>`).join('');
+}
+
+function renderAnnList() {
+  renderAnnouncementsTo('notif-list'); // full list, no limit
+}
+
+async function sendAnn() {
+  const title=document.getElementById('a-title').value.trim();
+  const body=document.getElementById('a-body').value.trim();
+  const type=document.getElementById('a-type').value;
+  if (!title||!body) { toast('⚠️ أكمل بيانات الإعلان','er'); return; }
+  setLoading('ann-btn', true, '');
+  try {
+    await FB.add('notifications', {title,body,type,time:new Date().toLocaleString('ar-EG')});
+    document.getElementById('a-title').value='';
+    document.getElementById('a-body').value='';
+    toast('📤 تم إرسال الإعلان');
+    N = await FB.get('notifications').catch(()=>N);
+    document.getElementById('d-notifs').textContent=N.length;
+    renderAnnList();              // full list page
+    renderAnnouncementsTo('dash-ann-list', 3);  // dashboard mini-card
+    renderAnnouncementsTo('par-ann-list', 5);   // parent view card
+  } catch(e) {
+    toast('❌ خطأ في الإرسال','er');
+  } finally {
+    setLoading('ann-btn', false, '📤 إرسال للأهالي');
+  }
+}
+
+// ══════════════════════════════════════════════
+//  PARENT VIEW
+// ══════════════════════════════════════════════
+function rPar() {
+  document.getElementById('par-list').innerHTML=S.map((s,i)=>`
+    <div class="itm" style="cursor:pointer" onclick="showPar('${s._id}')">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="background:${CLR[i%8]};width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px">${AVT[i%10]}</div>
+        <div><strong>${s.name}</strong><div class="sub">${s.par||''}</div></div>
+      </div>
+      <span class="chip cp">معاينة</span>
+    </div>`).join('');
+  renderAnnouncementsTo('par-ann-list', 5);
+}
+
+function showPar(sid) {
+  const s=S.find(x=>x._id===sid); if (!s) return;
+  const r=R[sid+'-'+TOD];
+  const td=A[TOD]||{};
+  const attOk = td[sid]==='present';
+  const ast = attOk?'تم تسجيل الحضور ✅':td[sid]==='late'?'تأخر في الوصول ⏰':td[sid]==='absent'?'غائب اليوم ❌':'لم يُسجّل بعد';
+  const attColor = attOk?'#22c55e':td[sid]==='late'?'#fb923c':td[sid]==='absent'?'#f43f5e':'#94a3b8';
+
+  document.getElementById('par-title').textContent='أهلاً، ولي أمر '+s.name;
+  document.getElementById('par-upd').textContent='مزامنة: '+new Date().toLocaleTimeString('ar-EG');
+
+  const row = (icon, color, title, value) => `
+    <div class="mc2">
+      <div class="mc2-icon" style="background:${color}22;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex-shrink:0;">${icon}</div>
+      <div><strong style="font-size:11.5px;display:block">${title}</strong><div class="sub" style="margin-top:2px">${value}</div></div>
+    </div>`;
+
+  let html = '';
+  html += row('✅', attColor, 'الحضور', ast);
+  html += row('🍽️', '#f97316', 'الوجبة', r ? r.meal : 'لم يُملأ التقرير بعد');
+  html += row('😴', '#3b82f6', 'النوم', r ? r.sleep+' دقيقة' : '—');
+  html += row('🎨', '#a855f7', 'النشاط', r ? (r.activity||'—') : '—');
+  html += row('😊', '#22c55e', 'الحالة العامة', r ? r.mood : '—');
+  if (r && r.note) html += row('💬', '#ec4899', 'رسالة المعلمة', r.note);
+  html += row('💰', '#fbbf24', 'الرسوم الشهرية', (s.fees||0).toLocaleString('ar-EG')+' ج.م ✅');
+
+  document.getElementById('par-body').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+//  PRINT
+// ══════════════════════════════════════════════
+function rPrint() {
+  document.getElementById('print-list').innerHTML=S.map((s,i)=>`
+    <div class="itm" style="cursor:pointer" onclick="showPrintPreview('${s._id}')">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="background:${CLR[i%8]};width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px">${AVT[i%10]}</div>
+        <div><strong>${s.name}</strong><div class="sub">${s.cls}</div></div>
+      </div>
+      <span class="chip cgr">معاينة</span>
+    </div>`).join('');
+}
+
+function showPrintPreview(sid) {
+  const s=S.find(x=>x._id===sid); if (!s) return;
+  const r=R[sid+'-'+TOD];
+  const td=A[TOD]||{};
+  const attState=td[sid]==='present'?'حاضر ✅':td[sid]==='late'?'متأخر ⏰':td[sid]==='absent'?'غائب ❌':'—';
+  const today=new Date().toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('print-preview').innerHTML=`
+    <div id="print-content" style="direction:rtl;">
+      <div style="text-align:center;border-bottom:2px solid #4f46e5;padding-bottom:10px;margin-bottom:14px;">
+        <div style="font-size:22px">🧸</div>
+        <h2 style="color:#4f46e5;font-size:15px;margin:4px 0">Co-Care — نظام إدارة الحضانة</h2>
+        <p style="color:#6b7280;font-size:11px">التقرير اليومي للطفل</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;">
+        <div style="background:#f0f4ff;border-radius:8px;padding:9px;"><div style="color:#6b7280;font-size:11px">اسم الطفل</div><div style="font-weight:700;font-size:13px;margin-top:3px">${s.name}</div></div>
+        <div style="background:#f0f4ff;border-radius:8px;padding:9px;"><div style="color:#6b7280;font-size:11px">الفصل</div><div style="font-weight:700;font-size:13px;margin-top:3px">${s.cls}</div></div>
+        <div style="background:#f0f4ff;border-radius:8px;padding:9px;"><div style="color:#6b7280;font-size:11px">ولي الأمر</div><div style="font-weight:700;font-size:12px;margin-top:3px">${s.par||'—'}</div></div>
+        <div style="background:#f0f4ff;border-radius:8px;padding:9px;"><div style="color:#6b7280;font-size:11px">تاريخ التقرير</div><div style="font-weight:700;font-size:11px;margin-top:3px">${today}</div></div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr>
+          <th style="background:#4f46e5;color:#fff;padding:8px 10px;text-align:right">البند</th>
+          <th style="background:#4f46e5;color:#fff;padding:8px 10px;text-align:right">التفاصيل</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">✅ الحضور</td><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0;font-weight:600">${attState}</td></tr>
+          <tr><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">🍽️ الوجبة</td><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">${r?r.meal:'—'}</td></tr>
+          <tr><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">😴 النوم</td><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">${r?r.sleep+' دقيقة':'—'}</td></tr>
+          <tr><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">🚽 الحمّام</td><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">${r?r.toilet:'—'}</td></tr>
+          <tr><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">🎨 النشاط</td><td style="padding:8px 10px;border-bottom:1px solid #e2e8f0">${r?r.activity||'—':'—'}</td></tr>
+          <tr><td style="padding:8px 10px">😊 الحالة العامة</td><td style="padding:8px 10px;font-weight:600">${r?r.mood:'—'}</td></tr>
+        </tbody>
+      </table>
+      ${r&&r.note?`<div style="margin-top:10px;background:#f0f4ff;border-radius:8px;padding:10px;border-right:3px solid #4f46e5"><div style="color:#6b7280;font-size:11px;margin-bottom:3px">💬 رسالة المعلمة</div><div style="font-size:12px;line-height:1.7">${r.note}</div></div>`:''}
+      <div style="margin-top:14px;text-align:center;color:#6b7280;font-size:10px;border-top:1px solid #e2e8f0;padding-top:8px">Co-Care | © ${new Date().getFullYear()}</div>
+    </div>
+    <div class="fa" style="margin-top:10px;">
+      <button class="btn bprint" onclick="doPrint()">🖨️ طباعة / حفظ PDF</button>
+    </div>`;
+}
+
+function doPrint() {
+  const content=document.getElementById('print-content');
+  if (!content) { toast('⚠️ اختر طفلاً أولاً','er'); return; }
+  const w=window.open('','_blank');
+  w.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير Co-Care</title>
+  <style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Tahoma,Arial,sans-serif;direction:rtl;padding:20px;color:#111;background:#fff}table{width:100%;border-collapse:collapse}th,td{padding:8px 10px;border-bottom:1px solid #e2e8f0;text-align:right;font-size:12px}th{background:#4f46e5;color:#fff}</style>
+  </head><body>${content.innerHTML}</body></html>`);
+  w.document.close();
+  setTimeout(()=>w.print(), 400);
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+setTheme(currentTheme);
+document.getElementById('today-date').textContent =
+  new Date().toLocaleDateString('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+loadAll();
+</script>
+</body>
+</html>
