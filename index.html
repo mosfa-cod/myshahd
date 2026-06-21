@@ -1,4 +1,4 @@
-<!doctype html>
+ <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8"/>
@@ -17,7 +17,7 @@
 [data-theme="dark"]{--bg:#0d1117;--card:#161b22;--sidebar:#010409;--text:#e6edf3;--muted:#8b949e;--border:#30363d;--hover:rgba(99,102,241,.25);}
 [data-theme="purple"]{--bg:#1a0533;--card:#2d0f4e;--sidebar:#0d0019;--text:#e9d5ff;--muted:#a78bfa;--border:#4c1d95;--primary:#7c3aed;--hover:rgba(124,58,237,.25);}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:"Baloo Bhaijaan 2",Tahoma,"Noto Sans Arabic",Arial,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .3s,color .3s;font-size:15px;}
+body{font-family:"Segoe UI","Tahoma","Noto Sans Arabic",Arial,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;transition:background .3s,color .3s;font-size:15px;font-weight:600;}
 body[data-theme="light"]{background:radial-gradient(circle at 8% 10%,#fde9ff 0%,transparent 38%),radial-gradient(circle at 95% 18%,#dcfdf3 0%,transparent 40%),radial-gradient(circle at 50% 95%,#fff3d6 0%,transparent 45%),var(--bg);}
 .app{display:grid;grid-template-columns:265px 1fr;height:100vh;}
 .sidebar{background:linear-gradient(180deg,#1e1b4b 0%,#2d2467 60%,#1e1b4b 100%);display:flex;flex-direction:column;overflow:hidden;box-shadow:4px 0 24px rgba(30,27,75,.2);}
@@ -123,6 +123,15 @@ body[data-theme="light"]{background:radial-gradient(circle at 8% 10%,#fde9ff 0%,
 .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.mobile-cards{display:none;}
+.student-card{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1.5px solid var(--border);border-radius:16px;background:var(--bg);margin-bottom:10px;}
+.student-card .av-box{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;flex-shrink:0;}
+.student-card .info{flex:1;min-width:0;}
+.student-card .info .name-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.student-card .info strong{font-size:14px;font-weight:800;}
+.student-card .rows{display:grid;gap:4px;margin-top:6px;}
+.student-card .rows .r{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+.student-card .rows .r b{color:var(--text);font-weight:700;}
 .mobile-topbar{display:none;}
 .mobile-overlay{display:none;}
 
@@ -154,8 +163,8 @@ body[data-theme="light"]{background:radial-gradient(circle at 8% 10%,#fde9ff 0%,
   .fg{grid-template-columns:1fr;}
   .ph{flex-direction:column;align-items:stretch;}
   .ph .btn{width:100%;justify-content:center;}
-  .table-wrap{margin:0 -16px;padding:0 16px;}
-  .tbl{min-width:600px;}
+  .table-wrap.desktop-table{display:none;}
+  .mobile-cards{display:block;}
   .md{width:94vw;padding:16px;max-height:92vh;}
   .ar{flex-wrap:wrap;gap:8px;}
   .ar > div:last-child{width:100%;justify-content:flex-start;}
@@ -266,12 +275,13 @@ body[data-theme="light"]{background:radial-gradient(circle at 8% 10%,#fde9ff 0%,
     <button class="btn bp" onclick="openM('add-modal')">➕ إضافة طفل</button>
   </div>
   <div class="card">
-    <div class="table-wrap">
+    <div class="table-wrap desktop-table">
     <table class="tbl">
       <thead><tr><th></th><th>الاسم</th><th>الفصل</th><th>تاريخ الميلاد</th><th>ولي الأمر</th><th>الهاتف</th><th>الرسوم</th><th></th></tr></thead>
       <tbody id="s-tbody"><tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">⏳ جاري التحميل من Firebase...</td></tr></tbody>
     </table>
     </div>
+    <div id="s-cards" class="mobile-cards"></div>
   </div>
 </div>
 
@@ -729,8 +739,10 @@ function renderAllCharts() {
 // ══════════════════════════════════════════════
 function rStudents() {
   const tbody=document.getElementById('s-tbody');
+  const cardsEl=document.getElementById('s-cards');
   if (!S.length) {
     tbody.innerHTML='<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--muted)">لا يوجد أطفال — اضغط "إضافة طفل"</td></tr>';
+    if (cardsEl) cardsEl.innerHTML='<p class="sub" style="text-align:center;padding:16px 0">لا يوجد أطفال — اضغط "إضافة طفل"</p>';
     return;
   }
   tbody.innerHTML=S.map((s,i)=>`
@@ -744,6 +756,26 @@ function rStudents() {
       <td>${(s.fees||0).toLocaleString('ar-EG')} ج.م</td>
       <td><button class="btn bdr bsm" onclick="delStudent('${s._id}','${s.name}')">🗑️</button></td>
     </tr>`).join('');
+
+  if (cardsEl) {
+    cardsEl.innerHTML=S.map((s,i)=>`
+      <div class="student-card">
+        <div class="av-box" style="background:${CLR[i%8]}">${AVT[i%10]}</div>
+        <div class="info">
+          <div class="name-row">
+            <strong>${s.name||'—'}</strong>
+            <button class="btn bdr bsm" onclick="delStudent('${s._id}','${s.name}')">🗑️</button>
+          </div>
+          <div class="rows">
+            <div class="r"><span>الفصل</span><b>${s.cls||'—'}</b></div>
+            <div class="r"><span>تاريخ الميلاد</span><b>${s.dob||'—'}</b></div>
+            <div class="r"><span>ولي الأمر</span><b>${s.par||'—'}</b></div>
+            <div class="r"><span>الهاتف</span><b dir="ltr">${s.phone||'—'}</b></div>
+            <div class="r"><span>الرسوم</span><b>${(s.fees||0).toLocaleString('ar-EG')} ج.م</b></div>
+          </div>
+        </div>
+      </div>`).join('');
+  }
 }
 
 async function addStudent() {
